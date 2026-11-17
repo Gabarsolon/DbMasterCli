@@ -202,6 +202,12 @@ namespace DbCli
             }
 
             db.SaveDb(outputDbPath);
+            // The schema XML is regenerated together with the DB (offsets/indices change); the game needs the matching pair.
+            string outputXmlPath = outputDbPath.EndsWith(".DB", StringComparison.OrdinalIgnoreCase)
+                ? outputDbPath.Substring(0, outputDbPath.Length - 3) + "-meta.XML"
+                : outputDbPath + "-meta.xml";
+            db.SaveXml(outputXmlPath);
+            Console.WriteLine($"Saved matching meta XML to: {outputXmlPath}");
             Console.WriteLine($"Successfully imported table and saved database to: {outputDbPath}");
         }
 
@@ -281,6 +287,12 @@ namespace DbCli
             }
 
             db.SaveDb(outputDbPath);
+            // The schema XML is regenerated together with the DB (offsets/indices change); the game needs the matching pair.
+            string outputXmlPath = outputDbPath.EndsWith(".DB", StringComparison.OrdinalIgnoreCase)
+                ? outputDbPath.Substring(0, outputDbPath.Length - 3) + "-meta.XML"
+                : outputDbPath + "-meta.xml";
+            db.SaveXml(outputXmlPath);
+            Console.WriteLine($"Saved matching meta XML to: {outputXmlPath}");
             Console.WriteLine($"Successfully saved database to: {outputDbPath}");
         }
 

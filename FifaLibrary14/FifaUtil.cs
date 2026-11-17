@@ -171,7 +171,7 @@ namespace FifaLibrary
 			w.Write(bytes);
 			for (int i = bytes.Length; i < length; i++)
 			{
-				w.Write(0);
+				w.Write((byte)0);
 			}
 		}
 

@@ -271,8 +271,7 @@ namespace FifaLibrary
 			w.Write((ushort)this.m_NValidRecords);
 			w.Write(this.m_Unknown14);
 			w.Write((byte)this.m_TableDescriptor.NFields);
-			w.Write(0);
-			w.Write(0);
+			w.Write(new byte[3]);
 			w.Write(this.m_Unknown1C);
 			this.m_CrcTableHeaderPosition = w.BaseStream.Position;
 			w.Write(-1);
