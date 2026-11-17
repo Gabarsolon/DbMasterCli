@@ -159,7 +159,7 @@ namespace DbCli
             if (table == null)
             {
                 Console.WriteLine($"ERROR: Table '{tableName}' not found in database.");
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine($"Exporting table '{tableName}' to '{outputFile}'...");
@@ -172,7 +172,7 @@ namespace DbCli
             if (!File.Exists(inputFile))
             {
                 Console.WriteLine($"ERROR: Input file not found: {inputFile}");
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine("Loading Database...");
@@ -182,14 +182,14 @@ namespace DbCli
             if (table == null)
             {
                 Console.WriteLine($"ERROR: Table '{tableName}' not found in database.");
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine($"Importing table '{tableName}' from '{inputFile}'...");
             if (!ImportTable(table, inputFile))
             {
                 Console.WriteLine("ERROR: Import failed (column structure mismatch or empty file).");
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine("Rebuilding database file...");
@@ -231,7 +231,7 @@ namespace DbCli
             if (!Directory.Exists(inputDir))
             {
                 Console.WriteLine($"ERROR: Input directory not found: {inputDir}");
-                return;
+                Environment.Exit(1);
             }
 
             Console.WriteLine("Loading Database...");
@@ -239,6 +239,11 @@ namespace DbCli
             DataSet ds = db.ConvertToDataSet();
 
             string[] txtFiles = Directory.GetFiles(inputDir, "*.txt");
+            if (txtFiles.Length == 0)
+            {
+                Console.WriteLine($"ERROR: No .txt files found in input directory: {inputDir}");
+                Environment.Exit(1);
+            }
             Console.WriteLine($"Found {txtFiles.Length} text files in directory. Importing...");
 
             int successCount = 0;
@@ -258,6 +263,12 @@ namespace DbCli
                         Console.WriteLine($"  WARNING: Failed to import table {tableName}");
                     }
                 }
+            }
+
+            if (successCount == 0)
+            {
+                Console.WriteLine("ERROR: No tables were successfully imported.");
+                Environment.Exit(1);
             }
 
             Console.WriteLine($"Successfully imported {successCount} tables. Rebuilding and saving database...");
@@ -295,9 +306,27 @@ namespace DbCli
             }
         }
 
+        static Encoding DetectEncoding(string fileName)
+        {
+            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                if (fs.Length >= 2)
+                {
+                    byte b0 = (byte)fs.ReadByte();
+                    byte b1 = (byte)fs.ReadByte();
+                    if (b0 == 0xFF && b1 == 0xFE) return Encoding.Unicode; // UTF-16 LE BOM
+                    if (b0 == 0xFE && b1 == 0xFF) return Encoding.BigEndianUnicode;
+                    if (b0 == 0xEF && b1 == 0xBB) return Encoding.UTF8;
+                    if (b1 == 0x00) return Encoding.Unicode; // UTF-16 LE without BOM
+                }
+            }
+            return Encoding.UTF8;
+        }
+
         static bool ImportTable(DataTable t, string fileName)
         {
-            using (StreamReader streamReader = new StreamReader(fileName, Encoding.Unicode))
+            Encoding enc = DetectEncoding(fileName);
+            using (StreamReader streamReader = new StreamReader(fileName, enc))
             {
                 string text = streamReader.ReadLine();
                 if (text == null)

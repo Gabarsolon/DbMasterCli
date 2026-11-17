@@ -10,22 +10,25 @@ Developed on top of the decompiled `FifaLibrary14` library.
 
 - **List Tables**: Show all tables in the database and their record counts.
 - **Table Info**: Show schema definition (columns and data types) for a specific table.
-- **Export Single Table**: Export a table's records to a tab-separated `.txt` file.
-- **Import Single Table**: Load a tab-separated `.txt` file into a table and rebuild/save the database.
+- **Export Single Table**: Export a table's records to a tab-separated `.tsv` / `.txt` file.
+- **Import Single Table**: Load a tab-separated `.tsv` / `.txt` file into a table and rebuild/save the database.
 - **Export All Tables**: Batch export all database tables to a target directory.
 - **Import All Tables**: Batch import all tables from a directory and save the resulting database.
+- **Auto-Encoding Detection**: Supports tab-separated files in UTF-16LE without BOM (pandas/Python output), UTF-8 (with or without BOM), and ANSI/ASCII.
+- **Database Corruption Fix**: Patched `DbFile.cs` to ensure `ComputeAllCrc` calculates and writes checksums to the newly saved database file rather than corrupting the input database.
+- **Strict Exit Codes**: Returns non-zero exit codes on failure for seamless pipeline automation.
 
 ---
 
 ## Building
 
-Open the solution and build using MSBuild:
+Build using the .NET CLI:
 
 ```powershell
-MSBuild.exe DbCli.csproj /p:Configuration=Debug /p:Platform="AnyCPU"
+dotnet build -c Debug -p:Platform="AnyCPU"
 ```
 
-*Note: The project automatically copies the required DirectX and zlib.net dependencies from the `ThirdParty` directory during compiling.*
+*Note: The project automatically references `Microsoft.NETFramework.ReferenceAssemblies` via `Directory.Build.props` and includes dependencies from `ThirdParty`.*
 
 ---
 
@@ -46,12 +49,12 @@ Lists all tables and their row counts:
 
 ### 3. Export a Single Table
 ```powershell
-.\DbCli.exe export-table <db_path> <xml_path> <table_name> <output_txt_file>
+.\DbCli.exe export-table <db_path> <xml_path> <table_name> <output_tsv_file>
 ```
 
 ### 4. Import a Single Table
 ```powershell
-.\DbCli.exe import-table <db_path> <xml_path> <table_name> <input_txt_file> <output_db_path>
+.\DbCli.exe import-table <db_path> <xml_path> <table_name> <input_tsv_file> <output_db_path>
 ```
 
 ### 5. Export All Tables
